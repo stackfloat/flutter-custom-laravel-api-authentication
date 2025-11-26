@@ -15,7 +15,7 @@ class SignupScreen extends StatelessWidget {
         // Handle side effects (navigation, snackbars, etc.)
         if (state.signupSuccessful) {
           // Navigate to login or dashboard
-          // context.go('/login');
+          context.go('/dashboard');
         }
 
         if (state.signupFailedMessage != null) {

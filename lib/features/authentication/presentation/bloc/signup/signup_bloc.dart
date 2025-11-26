@@ -53,8 +53,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
           formErrors: {
             ...state.formErrors,
             'password': passwordError,
-            if (confirmPasswordError != null)
-              'confirmPassword': confirmPasswordError,
+            'confirmPassword': confirmPasswordError,
           },
           signupFailedMessage: null,
           clearSignupFailedMessage: true,
@@ -104,8 +103,9 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       if (nameError != null) errors['name'] = nameError;
       if (emailError != null) errors['email'] = emailError;
       if (passwordError != null) errors['password'] = passwordError;
-      if (confirmPasswordError != null)
+      if (confirmPasswordError != null) {
         errors['confirmPassword'] = confirmPasswordError;
+      }
 
       if (errors.isEmpty) {
         // Form is valid - proceed with signup
