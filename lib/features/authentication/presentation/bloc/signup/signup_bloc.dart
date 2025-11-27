@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/login_usecase.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/signup_params.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/signup_usecase.dart';
 
@@ -124,12 +123,31 @@ final SignupUseCase signupUseCase;
             clearFormErrors: true,
           ),
         );
-        final result = await signupUseCase(SignupParams(
-          name: state.name,
-          email: state.email,
-          password: state.password,
-        ));
-        emit(state.copyWith(isSubmitting: false, signupSuccessful: true));
+        final result = await signupUseCase(
+          SignupParams(
+            name: state.name,
+            email: state.email,
+            password: state.password,
+          ),
+        );
+
+        result.fold(
+          (failure) => emit(
+            state.copyWith(
+              isSubmitting: false,
+              signupFailedMessage: failure.message,
+              signupSuccessful: false,
+            ),
+          ),
+          (_) => emit(
+            state.copyWith(
+              isSubmitting: false,
+              signupSuccessful: true,
+              signupFailedMessage: null,
+              clearSignupFailedMessage: true,
+            ),
+          ),
+        );
       } else {
         // Form has errors
         emit(state.copyWith(formSubmitted: true, formErrors: errors));

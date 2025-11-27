@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/login_params.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/login_usecase.dart';
 
 part 'login_event.dart';
@@ -46,7 +47,7 @@ final LoginUseCase loginUseCase;
       emit(state.copyWith(showPassword: event.showPassword));
     });
     
-    on<LoginSubmitted>((event, emit) {
+    on<LoginSubmitted>((event, emit) async {
       // Validate all fields when form is submitted
       final emailError = _validateEmail(state.email, true);
       final passwordError = _validatePassword(state.password, true);
@@ -56,14 +57,36 @@ final LoginUseCase loginUseCase;
       if (passwordError != null) errors['password'] = passwordError;
       
       if (errors.isEmpty) {
-        // Form is valid - proceed with login
         emit(state.copyWith(
           formSubmitted: true,
           isSubmitting: true,
           formErrors: {},
           clearFormErrors: true,
-        ));        
-        emit(state.copyWith(isSubmitting: false, loginSuccessful: true));
+          loginFailedMessage: null,
+          clearLoginFailedMessage: true,
+        ));
+
+        final result = await loginUseCase(
+          LoginParams(email: state.email, password: state.password),
+        );
+
+        result.fold(
+          (failure) => emit(
+            state.copyWith(
+              isSubmitting: false,
+              loginFailedMessage: failure.message,
+              loginSuccessful: false,
+            ),
+          ),
+          (_) => emit(
+            state.copyWith(
+              isSubmitting: false,
+              loginSuccessful: true,
+              loginFailedMessage: null,
+              clearLoginFailedMessage: true,
+            ),
+          ),
+        );
       } else {
         // Form has errors
         emit(state.copyWith(

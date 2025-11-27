@@ -11,10 +11,19 @@ class UserModel {
 
   // Convert from JSON (API response)
   factory UserModel.fromJson(Map<String, dynamic> json) {
+
+    final payload = json.containsKey('data') ? json['data'] : json;
+    
+    final userJson = payload['user'] is Map<String, dynamic>
+        ? payload['user'] as Map<String, dynamic>
+        : payload;
+
+    final token = payload['token'] ?? userJson['token'];
+
     return UserModel(
-      name: json['name'] as String,
-      email: json['email'] as String,
-      token: json['token'] as String,
+      name: userJson['name'] as String,
+      email: userJson['email'] as String,
+      token: token as String,
     );
   }
 

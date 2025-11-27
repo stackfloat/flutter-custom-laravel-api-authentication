@@ -1,14 +1,16 @@
-import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/entities/auth_entity.dart';
-import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/repositories/auth_repository.dart';
-import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/login_params.dart' show LoginParams;
+import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/errors/failures.dart';
+import '../entities/auth_entity.dart';
+import '../repositories/auth_repository.dart';
+import 'login_params.dart';
 
 class LoginUseCase {
   final AuthRepository repository;
 
   LoginUseCase(this.repository);
 
-  Future<AuthEntity> call(LoginParams params) {
+  Future<Either<Failure, AuthEntity>> call(LoginParams params) {
     return repository.login(params);
   }
 }
