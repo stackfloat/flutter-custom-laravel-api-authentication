@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-abstract class ISecureStorageService {
+abstract class SecureStorageService {
   Future<void> init();
   Future<void> write(String key, String value);
   Future<String?> read(String key);
@@ -27,7 +27,7 @@ abstract class ISecureStorageService {
   Future<void> deleteFcmToken();
 }
 
-class SecureStorageService implements ISecureStorageService {
+class SecureStorageServiceImpl implements SecureStorageService {
   static const _logTag = 'SecureStorage';
 
   // ✅ Centralized keys
@@ -40,21 +40,7 @@ class SecureStorageService implements ISecureStorageService {
   final FlutterSecureStorage _storage;
   bool _initialized = false;
 
-  SecureStorageService(this._storage);
-
-  /// ✅ Factory for production use
-  factory SecureStorageService.create() {
-    return SecureStorageService(
-      const FlutterSecureStorage(
-        aOptions: AndroidOptions(
-          encryptedSharedPreferences: true,
-        ),
-        iOptions: IOSOptions(
-          accessibility: KeychainAccessibility.first_unlock,
-        ),
-      ),
-    );
-  }
+  SecureStorageServiceImpl(this._storage);
 
   /// ✅ Call at app startup
   @override

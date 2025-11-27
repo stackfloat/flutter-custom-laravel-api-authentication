@@ -9,9 +9,6 @@ class LoginUseCase {
   LoginUseCase(this.repository);
 
   Future<AuthEntity> call(LoginParams params) {
-    return repository.login(
-      email: params.email,
-      password: params.password,
-    );
+    return repository.login(params);
   }
 }

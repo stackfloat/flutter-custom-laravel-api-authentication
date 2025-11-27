@@ -1,15 +1,24 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/login_usecase.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/signup_params.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/signup_usecase.dart';
 
 part 'signup_event.dart';
 part 'signup_state.dart';
 
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
-  SignupBloc() : super(SignupState.initial()) {
+
+final SignupUseCase signupUseCase;
+final LoginUseCase loginUseCase;
+
+  SignupBloc({
+    required this.signupUseCase,
+    required this.loginUseCase,
+  }) : super(SignupState.initial()) {
     on<NameChanged>((event, emit) {
       // Validate name on change
       final nameError = _validateName(event.name);
-
       emit(
         state.copyWith(
           name: event.name,
@@ -89,7 +98,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       emit(state.copyWith(showConfirmPassword: event.showConfirmPassword));
     });
 
-    on<SignupSubmitted>((event, emit) {
+    on<SignupSubmitted>((event, emit) async {
       // Validate all fields when form is submitted
       final nameError = _validateName(state.name);
       final emailError = _validateEmail(state.email);
@@ -117,8 +126,11 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
             clearFormErrors: true,
           ),
         );
-        // TODO: Call signup repository/service
-        // For now, just simulate success
+        final result = await signupUseCase(SignupParams(
+          name: state.name,
+          email: state.email,
+          password: state.password,
+        ));
         emit(state.copyWith(isSubmitting: false, signupSuccessful: true));
       } else {
         // Form has errors

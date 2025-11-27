@@ -1,4 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_custom_laravel_api_authentication/core/dependency_injection/injection_container.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/login_usecase.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/signup_usecase.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/presentation/bloc/login/login_bloc.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/presentation/bloc/signup/signup_bloc.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/presentation/screens/login_screen.dart';
@@ -27,7 +30,10 @@ class AppRouter {
         path: '/signup',
         name: 'signup',
         builder: (context, state) => BlocProvider(
-          create: (context) => SignupBloc(),
+          create: (context) => SignupBloc(
+            signupUseCase: getIt<SignupUseCase>(),
+            loginUseCase: getIt<LoginUseCase>(),
+          ),
           child: const SignupScreen(),
         ),
       ),      

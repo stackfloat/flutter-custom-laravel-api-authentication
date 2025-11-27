@@ -4,21 +4,30 @@ import '../models/login_request_model.dart';
 import '../models/signup_request_model.dart';
 import '../models/user_model.dart';
 
-class AuthApiService {
-  final Dio dio;
-  AuthApiService(this.dio);
+abstract class AuthRemoteDataSource {
+  Future<UserModel> login(LoginRequestModel model);
+  Future<UserModel> signup(SignupRequestModel model);
+  Future<UserModel> getProfile();
+}
 
-  Future<UserModel> login(LoginRequestModel model) async {
+class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final Dio dio;
+  AuthRemoteDataSourceImpl(this.dio);
+
+  @override
+  Future<UserModel> login(LoginRequestModel model) async { 
     final response = await dio.post('/login', data: model.toJson());
     return UserModel.fromJson(response.data);
   }
 
-  Future<UserModel> signup(SignupRequestModel model) async {
+  @override
+  Future<UserModel> signup(SignupRequestModel model) async { 
     final response = await dio.post('/signup', data: model.toJson());
     return UserModel.fromJson(response.data);
   }
 
-  Future<UserModel> getProfile() async {
+  @override
+  Future<UserModel> getProfile() async { 
     final response = await dio.get('/me');
     return UserModel.fromJson(response.data);
   }

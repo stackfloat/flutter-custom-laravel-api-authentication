@@ -7,11 +7,8 @@ class SignupUseCase {
 
   SignupUseCase(this.repository);
 
-  Future<AuthEntity> call(SignupParams params) {
-    return repository.signup(
-      name: params.name,
-      email: params.email,
-      password: params.password,
-    );
+  Future<AuthEntity> call(SignupParams params) {    
+
+    return repository.signup(params);
   }
 }
