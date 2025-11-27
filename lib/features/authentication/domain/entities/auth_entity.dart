@@ -1,43 +1,22 @@
-import 'auth_token_entity.dart';
-import 'user_entity.dart';
+import 'package:equatable/equatable.dart';
 
-/// Auth entity - Represents authentication state with user and token
-class AuthEntity {
-  final UserEntity user;
-  final AuthTokenEntity token;
+/// Auth entity - Represents authentication state with user name, email and token
+class AuthEntity extends Equatable {
+  final String name;
+  final String email;
+  final String token;
 
   const AuthEntity({
-    required this.user,
+    required this.name,
+    required this.email,
     required this.token,
   });
 
-  // Business logic methods
-  bool get isAuthenticated => token.isValid;
-
-  // Copy with method for immutability
-  AuthEntity copyWith({
-    UserEntity? user,
-    AuthTokenEntity? token,
-  }) {
-    return AuthEntity(
-      user: user ?? this.user,
-      token: token ?? this.token,
-    );
-  }
-
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is AuthEntity &&
-        other.user == user &&
-        other.token == token;
-  }
-
-  @override
-  int get hashCode => user.hashCode ^ token.hashCode;
+  List<Object> get props => [name, email, token];
 
   @override
   String toString() {
-    return 'AuthEntity(user: $user, isAuthenticated: $isAuthenticated)';
+    return 'AuthEntity(name: $name, email: $email, token: [REDACTED])';
   }
 }
