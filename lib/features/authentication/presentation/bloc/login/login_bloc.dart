@@ -1,11 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/login_usecase.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(LoginState.initial()) {
+
+final LoginUseCase loginUseCase;
+
+  LoginBloc({required this.loginUseCase}) : super(LoginState.initial()) {
     on<EmailChanged>((event, emit) {
       // Validate email on change
       final emailError = _validateEmail(event.email, state.formSubmitted);

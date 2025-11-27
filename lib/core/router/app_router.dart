@@ -22,7 +22,9 @@ class AppRouter {
         path: '/login',
         name: 'login',
         builder: (context, state) => BlocProvider(
-          create: (context) => LoginBloc(),
+          create: (context) => LoginBloc(
+            loginUseCase: getIt.get<LoginUseCase>(),
+          ),
           child: const LoginScreen(),
         ),
       ),
@@ -32,7 +34,6 @@ class AppRouter {
         builder: (context, state) => BlocProvider(
           create: (context) => SignupBloc(
             signupUseCase: getIt<SignupUseCase>(),
-            loginUseCase: getIt<LoginUseCase>(),
           ),
           child: const SignupScreen(),
         ),
@@ -41,7 +42,9 @@ class AppRouter {
         path: '/',
         name: 'home',
         builder: (context, state) => BlocProvider(
-          create: (context) => LoginBloc(),
+          create: (context) => LoginBloc(
+            loginUseCase: getIt.get<LoginUseCase>(),
+          ),
           child: DashboardScreen(),
         ),
       ),

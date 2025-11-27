@@ -7,7 +7,6 @@ import '../models/user_model.dart';
 abstract class AuthRemoteDataSource {
   Future<UserModel> login(LoginRequestModel model);
   Future<UserModel> signup(SignupRequestModel model);
-  Future<UserModel> getProfile();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -17,18 +16,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> login(LoginRequestModel model) async { 
     final response = await dio.post('/login', data: model.toJson());
-    return UserModel.fromJson(response.data);
+    return UserModel.fromJson(response.data); 
   }
 
   @override
   Future<UserModel> signup(SignupRequestModel model) async { 
-    final response = await dio.post('/signup', data: model.toJson());
-    return UserModel.fromJson(response.data);
-  }
-
-  @override
-  Future<UserModel> getProfile() async { 
-    final response = await dio.get('/me');
+    final response = await dio.post('/register', data: model.toJson());
     return UserModel.fromJson(response.data);
   }
 }

@@ -5,6 +5,8 @@ import 'package:flutter_custom_laravel_api_authentication/features/authenticatio
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/login_usecase.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/signup_usecase.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/presentation/bloc/login/login_bloc.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/presentation/bloc/signup/signup_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import '../network/dio_client.dart';
@@ -53,4 +55,14 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton<LoginUseCase>(
     () => LoginUseCase(getIt<AuthRepository>()),
   );
+  
+  // Blocs
+  getIt.registerFactory<SignupBloc>(
+    () => SignupBloc(signupUseCase: getIt<SignupUseCase>()),
+  );
+  
+  getIt.registerFactory<LoginBloc>(
+    () => LoginBloc(loginUseCase: getIt.get<LoginUseCase>()),
+  );
+
 }

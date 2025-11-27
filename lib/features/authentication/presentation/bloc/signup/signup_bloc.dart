@@ -10,11 +10,9 @@ part 'signup_state.dart';
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
 
 final SignupUseCase signupUseCase;
-final LoginUseCase loginUseCase;
 
   SignupBloc({
     required this.signupUseCase,
-    required this.loginUseCase,
   }) : super(SignupState.initial()) {
     on<NameChanged>((event, emit) {
       // Validate name on change
