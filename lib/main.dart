@@ -1,17 +1,74 @@
+import 'dart:async';
+import 'dart:ui';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_custom_laravel_api_authentication/core/logging/app_logger.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_custom_laravel_api_authentication/core/dependency_injection/injection_container.dart';
 import 'package:flutter_custom_laravel_api_authentication/core/router/app_router.dart';
 import 'package:flutter_custom_laravel_api_authentication/core/theme/app_theme.dart';
+import 'package:flutter_custom_laravel_api_authentication/firebase_options.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+ 
+      try {
+        await dotenv.load(fileName: '.env');
+      } catch (e) {
+        debugPrint('ENV load failed: $e');
+      }
 
-  // Initialize dependencies
-  await initDependencies();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
 
-  // Run the app
-  runApp(const MainApp());
+      final crashlyticsEnabled =
+          (dotenv.env['SEND_ERRORS_TO_CRASHLYTICS'] ?? 'false').toLowerCase() ==
+          'true';
+
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+        crashlyticsEnabled,
+      );
+
+      if (crashlyticsEnabled) {
+        FlutterError.onError =
+            FirebaseCrashlytics.instance.recordFlutterFatalError;
+        PlatformDispatcher.instance.onError = (error, stack) {
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          return true;
+        };
+      }
+
+      try {
+        await initDependencies();
+      } catch (e, s) {
+        FirebaseCrashlytics.instance.recordError(e, s, fatal: true);
+        rethrow;
+      }
+      
+
+      AppLogger().logInfo('App initialized');
+      AppLogger().logError('App initialized');
+
+      runApp(const MainApp());
+    },
+    (error, stack) {
+      final crashlyticsEnabled =
+          (dotenv.env['SEND_ERRORS_TO_CRASHLYTICS'] ?? 'false').toLowerCase() ==
+          'true';
+      if (crashlyticsEnabled) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      } else {
+        FlutterError.dumpErrorToConsole(
+          FlutterErrorDetails(exception: error, stack: stack),
+        );
+      }
+    },
+  );
 }
 
 class MainApp extends StatelessWidget {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "174516605192",
+    "project_id": "flutter-api-authentication",
+    "storage_bucket": "flutter-api-authentication.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174516605192:android:a9809015db506c4fa15cbd",
+        "android_client_info": {
+          "package_name": "com.example.flutter_custom_laravel_api_authentication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRbJw0mFEJla7Py6-x20wLVRR0aeC5VuA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

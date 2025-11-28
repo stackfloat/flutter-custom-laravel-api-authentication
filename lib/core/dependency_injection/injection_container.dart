@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_custom_laravel_api_authentication/core/logging/app_logger.dart';
 import 'package:flutter_custom_laravel_api_authentication/core/services/secure_storage_service.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/data/data_sources/auth_data_source.dart';
 import 'package:flutter_custom_laravel_api_authentication/features/authentication/data/repositories/auth_repository_impl.dart';
@@ -28,6 +29,9 @@ Future<void> initDependencies() async {
   final secureStorage = SecureStorageServiceImpl(getIt<FlutterSecureStorage>());
   await secureStorage.init();
   getIt.registerSingleton<SecureStorageService>(secureStorage);
+
+  // Logging
+  getIt.registerLazySingleton<AppLogger>(() => AppLogger());
 
   // Networking: Dio client + instance
   getIt.registerLazySingleton<DioClient>(
