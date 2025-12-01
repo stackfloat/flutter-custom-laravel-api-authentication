@@ -16,7 +16,7 @@ class LoginScreen extends StatelessWidget {
         // Handle side effects (navigation, snackbars, etc.)
         if (state.loginSuccessful) {
           // Navigate to home/dashboard
-          // context.go('/home');
+          context.go('/');
         }
 
         if (state.loginFailedMessage != null) {

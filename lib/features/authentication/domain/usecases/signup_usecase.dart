@@ -1,9 +1,9 @@
 import 'package:fpdart/fpdart.dart';
 
-import '../../../../core/errors/failures.dart';
-import '../entities/auth_entity.dart';
-import '../repositories/auth_repository.dart';
-import 'signup_params.dart';
+import 'package:flutter_custom_laravel_api_authentication/core/errors/failures.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/entities/auth_entity.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:flutter_custom_laravel_api_authentication/features/authentication/domain/usecases/signup_params.dart';
 
 class SignupUseCase {
   final AuthRepository repository;
