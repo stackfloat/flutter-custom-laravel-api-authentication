@@ -70,6 +70,11 @@ class AppLogger {
         stackTrace ?? StackTrace.current,
         reason: message,
       );
+
+      _crashlytics.log("Higgs-Boson detected! Bailing out");
+
+      print("Error logged to Crashlytics: $message");
+
     }
   }
 }

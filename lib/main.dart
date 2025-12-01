@@ -1,67 +1,122 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_custom_laravel_api_authentication/core/logging/app_logger.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_custom_laravel_api_authentication/core/logging/app_bloc_observer.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+
 import 'package:flutter_custom_laravel_api_authentication/core/dependency_injection/injection_container.dart';
 import 'package:flutter_custom_laravel_api_authentication/core/router/app_router.dart';
 import 'package:flutter_custom_laravel_api_authentication/core/theme/app_theme.dart';
-import 'package:flutter_custom_laravel_api_authentication/firebase_options.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
- 
+
+      // ✅ Load ENV
       try {
         await dotenv.load(fileName: '.env');
       } catch (e) {
         debugPrint('ENV load failed: $e');
       }
 
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+      final sentryEnabled =
+          (dotenv.env['SEND_ERRORS_TO_SENTRY'] ?? 'false').toLowerCase() ==
+              'true';
 
-      final crashlyticsEnabled =
-          (dotenv.env['SEND_ERRORS_TO_CRASHLYTICS'] ?? 'false').toLowerCase() ==
-          'true';
+      final sentryDsn = dotenv.env['SENTRY_DSN'];
 
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-        crashlyticsEnabled,
-      );
+      // ✅ Register BLoC observer FIRST (before DI)
+      Bloc.observer = AppBlocObserver();
 
-      if (crashlyticsEnabled) {
-        FlutterError.onError =
-            FirebaseCrashlytics.instance.recordFlutterFatalError;
-        PlatformDispatcher.instance.onError = (error, stack) {
-          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      // ✅ Flutter UI Errors (global)
+      FlutterError.onError = (details) {
+        if (sentryEnabled) {
+          Sentry.captureException(
+            details.exception,
+            stackTrace: details.stack,
+          );
+        } else {
+          FlutterError.dumpErrorToConsole(details);
+        }
+      };
+
+      // ✅ Platform / Isolate Errors
+      PlatformDispatcher.instance.onError = (error, stack) {
+        if (sentryEnabled) {
+          Sentry.captureException(error, stackTrace: stack);
           return true;
-        };
+        }
+        return false;
+      };
+
+      // ✅ Initialize Sentry ONLY if enabled
+      if (sentryEnabled && sentryDsn != null && sentryDsn.isNotEmpty) {
+        await SentryFlutter.init(
+          (options) {
+            options.dsn = sentryDsn;
+
+            // ✅ ZERO-OVERHEAD PRODUCTION SETUP
+            options.tracesSampleRate = 0.0;
+            options.environment = dotenv.env['APP_ENV'] ?? 'production';
+            options.enableAutoSessionTracking = true;
+            options.attachStacktrace = true;
+            options.sendDefaultPii = false;
+
+            // ✅ Filter noise
+            options.beforeSend = (event, hint) {
+              if (options.environment != 'production') {
+                return null;
+              }
+
+              final throwable = event.throwable.toString();
+
+              if (throwable.contains('SocketException') ||
+                  throwable.contains('HandshakeException')) {
+                return null;
+              }
+
+              return event;
+            };
+          },
+          appRunner: () async {
+            try {
+              await initDependencies();
+            } catch (e, s) {
+              Sentry.captureException(e, stackTrace: s);
+              rethrow;
+            }
+
+            runApp(const MainApp());
+          },
+        );
+      } else {
+        // ✅ Sentry Disabled (DEV / LOCAL)
+        try {
+          await initDependencies();
+        } catch (e, s) {
+          FlutterError.dumpErrorToConsole(
+            FlutterErrorDetails(exception: e, stack: s),
+          );
+          rethrow;
+        }
+
+        runApp(const MainApp());
       }
-
-      try {
-        await initDependencies();
-      } catch (e, s) {
-        FirebaseCrashlytics.instance.recordError(e, s, fatal: true);
-        rethrow;
-      }
-      
-
-      AppLogger().logInfo('App initialized');
-      AppLogger().logError('App initialized');
-
-      runApp(const MainApp());
     },
+
+    // ✅ Async Zone Errors (DO NOT await)
     (error, stack) {
-      final crashlyticsEnabled =
-          (dotenv.env['SEND_ERRORS_TO_CRASHLYTICS'] ?? 'false').toLowerCase() ==
-          'true';
-      if (crashlyticsEnabled) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      final sentryEnabled =
+          (dotenv.env['SEND_ERRORS_TO_SENTRY'] ?? 'false').toLowerCase() ==
+              'true';
+
+      if (sentryEnabled) {
+        Sentry.captureException(error, stackTrace: stack);
       } else {
         FlutterError.dumpErrorToConsole(
           FlutterErrorDetails(exception: error, stack: stack),
