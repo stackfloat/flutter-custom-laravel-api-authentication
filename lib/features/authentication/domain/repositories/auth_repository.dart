@@ -8,4 +8,5 @@ import '../usecases/signup_params.dart';
 abstract class AuthRepository {
   Future<Either<Failure, AuthEntity>> login(LoginParams params);
   Future<Either<Failure, AuthEntity>> signup(SignupParams params);
+  Future<Either<Failure, Unit>> logout();
 }

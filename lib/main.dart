@@ -15,7 +15,7 @@ import 'package:flutter_custom_laravel_api_authentication/core/theme/app_theme.d
 void main() async {
   runZonedGuarded(
     () async {
-      WidgetsFlutterBinding.ensureInitialized();
+      SentryWidgetsFlutterBinding.ensureInitialized();
 
       // ✅ Load ENV
       try {

@@ -59,9 +59,25 @@ class AuthRepositoryImpl implements AuthRepository {
     );
   }
 
+  @override
+  Future<Either<Failure, Unit>> logout() async {
+    try {
+      await _clearSession();
+      return const Right(unit);
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
   Future<void> _persistUser(UserModel userModel) async {
     await secureStorageService.saveAccessToken(userModel.token);
     await secureStorageService.saveUser(jsonEncode(userModel.toJson()));
+  }
+
+  Future<void> _clearSession() async {
+    await secureStorageService.deleteAccessToken();
+    await secureStorageService.deleteRefreshToken();
+    await secureStorageService.deleteUser();
   }
 
   AuthEntity _mapToEntity(UserModel user) {
