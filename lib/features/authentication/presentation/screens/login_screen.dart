@@ -1,7 +1,7 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../../../core/widgets/text_field_widget.dart';
 import '../bloc/login/login_bloc.dart';
@@ -108,7 +108,8 @@ class LoginScreen extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         // Navigate to signup
-                        context.go('/signup');
+                        // context.go('/signup');
+                        FirebaseCrashlytics.instance.crash();
                       },
                       child: const Text("Don't have an account? Sign up"),
                     ),
